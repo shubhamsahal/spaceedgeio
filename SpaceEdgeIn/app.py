@@ -19,9 +19,8 @@ import mimetypes
 # This assumes your directory structure is `.../SpaceEdgeIn/app.py`
 # and the templates and static folders are inside a subfolder.
 base_dir = os.path.dirname(os.path.abspath(__file__))
-project_dir = os.path.join(base_dir, 'SpaceEdgeIn') # This is the key change
-template_dir = os.path.join(project_dir, 'templates')
-static_dir = os.path.join(project_dir, 'static')
+template_dir = os.path.join(base_dir, 'templates')
+static_dir = os.path.join(base_dir, 'static')
 
 
 # Create the Flask app, pointing to the templates and static folders
@@ -560,3 +559,4 @@ def handle_file_too_large(e):
 
 if __name__ == "__main__":
     app.run(debug=True)
+"
