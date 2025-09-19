@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Space Edge</title>
+  <link rel="icon" type="image/png" href="/static/Images/logo.png">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      width: 100vw;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(108deg, #f4f6fa 0%, #e9eaf0 50%, #e6f0ff 100%);
+      box-sizing: border-box;
+      color: #262626;
+      min-width: 320px;
+      overflow-x: hidden;
+    }
+
+    nav {
+      width: 100vw;
+      background: rgba(255, 255, 255, 0.72);
+      box-shadow: 0 0px 2px rgba(10, 20, 20, 0.04);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 42px;
+      height: 62px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 10;
+      backdrop-filter: blur(12px);
+      flex-wrap: wrap;
+    }
+
+    .logo {
+      font-weight: 700;
+      font-size: 28px;
+      color: #007aff;
+      letter-spacing: 0.01em;
+      user-select: none;
+      text-shadow: 0 1px 12px #d7f4ff3a;
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      position: relative;
+      left: -50px;
+
+    }
+
+    .nav-btn {
+      background: none;
+      border: none;
+      font-size: 16px;
+      font-weight: 500;
+      color: #007aff;
+      cursor: pointer;
+      border-radius: 14px;
+      padding: 7px 22px;
+      transition: background .18s, color .14s;
+      text-decoration: none;
+      font-family: inherit;
+      margin-left: 0;
+      min-width: 100px;
+      text-align: center;
+    }
+
+    .nav-btn.main {
+      background: #007aff;
+      color: #fff;
+      font-weight: 700;
+      border: none;
+      box-shadow: 0 2px 12px #007aff12;
+      padding: 8px 29px;
+    }
+
+    .nav-btn.main:hover,
+    .hero-btn:hover {
+      background: #055fd6;
+      color: #fff;
+    }
+
+    .nav-btn:hover {
+      background: #e9f3ff;
+      color: #005bbb;
+    }
+
+    .main-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 120px;
+      padding: 0 16px;
+      width: 100vw;
+      min-height: 60vh;
+      animation: fadeIn 1.3s;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(28px);
+      }
+
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    .hero-card {
+      background: rgba(255, 255, 255, 0.75);
+      border-radius: 36px;
+      box-shadow: 0 6px 28px #005bbb0a;
+      max-width: 560px;
+      width: 100%;
+      padding: 56px 40px 44px;
+      margin-bottom: 50px;
+      text-align: center;
+      backdrop-filter: blur(7px);
+    }
+
+    .headline {
+      font-size: 3rem;
+      font-weight: 800;
+      margin-bottom: 27px;
+      color: #232330;
+      letter-spacing: -0.01em;
+      text-shadow: 0 3px 14px #c5dfff0a;
+    }
+
+    .subtext {
+      font-size: 1.25rem;
+      color: #313243;
+      margin-bottom: 38px;
+      line-height: 1.43;
+      font-weight: 400;
+    }
+
+    .cta-row {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+
+    .hero-btn {
+      background: #007aff;
+      color: #fff;
+      border: none;
+      font-size: 18px;
+      font-weight: 700;
+      border-radius: 12px;
+      padding: 13px 36px;
+      cursor: pointer;
+      transition: background 0.21s, box-shadow .16s;
+      box-shadow: 0 2px 14px #007aff22;
+      text-decoration: none;
+      margin-right: 6px;
+      border: 1.5px solid #007aff;
+    }
+
+    .outline-btn {
+      background: transparent;
+      color: #007aff;
+      border: 2px solid #007aff;
+      padding: 13px 36px;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.18s, color 0.18s, border 0.13s;
+    }
+
+    .outline-btn:hover {
+      background: #f1f6ff;
+      border-color: #055fd6;
+      color: #055fd6;
+    }
+
+    .featurebar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 480px;
+      user-select: none;
+    }
+
+    .feature-icon {
+      background: #10152b;
+      padding: 15px 28px;
+      border-radius: 40px;
+      margin-bottom: 16px;
+      color: #fff;
+      font-size: 23px;
+      font-weight: 500;
+      display: inline-block;
+      box-shadow: 0 3px 14px #b2cfff11;
+      letter-spacing: .06em;
+    }
+
+    .feature-headline {
+      font-size: 1.29rem;
+      color: #141422;
+      font-weight: 700;
+      margin-bottom: 7px;
+    }
+
+    .feature-desc {
+      color: #434b54;
+      margin-top: 3px;
+      font-size: 15px;
+      max-width: 520px;
+      line-height: 1.49;
+      margin-bottom: 11px;
+      font-weight: 400;
+      text-align: center;
+    }
+
+    @media (max-width:700px) {
+      .main-content {
+        margin-top: 90px;
+      }
+
+      .hero-card {
+        padding: 34px 12px;
+      }
+
+      .featurebar {
+        margin: 40px 0;
+      }
+
+      .headline {
+        font-size: 2.1rem;
+      }
+
+      .subtext {
+        font-size: 1.09rem;
+      }
+
+      nav {
+        padding: 0 11px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Navigation -->
+  <nav>
+    <div class="logo">Space Edge</div>
+    <div></div>
+    <div class="nav-actions">
+      <a href="{{ url_for('register') }}" class="nav-btn main">Get started</a>
+      <a href="{{ url_for('login') }}" class="nav-btn">Log in</a>
+    </div>
+  </nav>
+
+  <div class="main-content">
+    <!-- Hero Section -->
+    <div class="hero-card">
+      <div class="headline">Discover all.<br>Secure all.</div>
+      <div class="subtext">
+        Send large Files Instantly with Secure, free,<br>
+        and Easy to use SpaceEdge.
+      </div>
+      <div class="cta-row">
+        <a href="{{ url_for('register') }}" class="hero-btn">Try Space Edge Free</a>
+        <a href="{{ url_for('login') }}" class="outline-btn">Login</a>
+      </div>
+    </div>
+
+    <!-- Featurebar Section -->
+    <div class="featurebar">
+      <span class="feature-icon">🔒 Permissions</span>
+      <div class="feature-headline">Protect all your content</div>
+      <div class="feature-desc">
+        SpaceEdge makes it easy to find files across apps and safeguard sensitive content.
+        With smart search and universal access controls, your team stays connected, efficient, and secure.
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

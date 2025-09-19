@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Login | Space Edge</title>
+    <link rel="icon" type="image/png" href="/static/Images/logo.png">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', Arial, sans-serif;
+            background: #ffffff;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 32px 64px 24px 64px;
+            background: #fff;
+            box-shadow: 0 0 0 rgba(0,0,0,0); /* Clean header no shadow */
+        }
+        .logo {
+            font-size: 2.1rem;
+            font-weight: bold;
+            color: #0252cc;
+            letter-spacing: 1px;
+            text-decoration: none;
+        }
+        .container {
+            max-width: 420px;
+            margin: 60px auto;
+            padding: 36px 28px 40px 28px;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 32px;
+            color: #183153;
+        }
+        form.login-form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 340px;
+            margin: 0 auto;
+        }
+        form.login-form label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            font-size: 1.1rem;
+            width: 100%;
+            text-align: left;
+        }
+        form.login-form input[type="email"],
+        form.login-form input[type="password"] {
+            width: 100%;
+            padding: 11px 10px;
+            margin-bottom: 18px;
+            border: 1px solid #dbeafe;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: #f7fafe;
+            box-sizing: border-box;
+        }
+        form.login-form button.btn-login {
+            width: 100%;
+            background: #0252cc;
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1.1rem;
+            margin-top: 9px;
+            transition: background 0.15s;
+        }
+        form.login-form button.btn-login:hover {
+            background: #003780;
+        }
+
+        .register-link {
+            margin-top: 22px;
+            font-size: 1.1rem;
+        }
+        .register-link a {
+            text-decoration: none;
+            color: #0252cc;
+            font-weight: 600;
+        }
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* Discord button style */
+        .btn-discord {
+            display: inline-block;
+            margin-top: 18px;
+            padding: 12px 0;
+            width: 340px; /* same width as inputs */
+            background-color: #0252cc;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .btn-discord:hover {
+            background-color: #003780;
+        }
+
+        .flash-message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 22px;
+            color: #b33a3a;
+            background: #ffe6e6;
+            font-size: 15px;
+            text-align: left;
+            max-width: 340px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .footer-social a {
+            display: inline-block;
+            margin: 0 9px;
+            transition: transform 0.13s;
+        }
+        .footer-social a:hover {
+            transform: translateY(-4px) scale(1.08);
+            opacity: 0.9;
+        }
+        .footer-copy {
+            margin-top: 11px;
+            color: #7d8b99;
+            font-size: 0.96rem;
+            letter-spacing: 0.03em;
+        }
+        @media (max-width: 650px) {
+            .header { padding: 14px 12px; }
+            .container { margin: 40px 7px; padding: 22px 8px; }
+            form.login-form, .btn-discord, .flash-message {
+                width: 100%;
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="{{ url_for('home') }}">
+            <img src="{{ url_for('static', filename='Images/left-side-logo-right-side-text.png') }}" alt="Space Edge Logo" style="width: 300px; height: auto;">
+        </a>
+    </div>
+
+    <div class="container">
+        <h2>Login</h2>
+        <!-- Flash messages -->
+        {% if not current_user.is_authenticated %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, msg in messages %}
+                    <div class="flash-message {{ category }}">{{ msg }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        {% endif %}
+
+        <form method="post" novalidate class="login-form">
+            <label>Email:</label>
+            <input type="email" name="email" autocomplete="email" required />
+            <label>Password:</label>
+            <input type="password" name="password" autocomplete="current-password" required />
+            <button class="btn-login" type="submit">Login</button>
+        </form>
+
+        <div class="register-link">
+            Don't have an account?
+            <a href="{{ url_for('register') }}">Register here</a>
+        </div>
+
+        <a href="{{ url_for('discord_login') }}" class="btn-discord">Login Or Signup with Discord</a>
+    </div>
+
+    <!-- Footer 
+    <footer class="site-footer">
+      <div class="footer-content">
+        <div class="footer-social">
+          <a href="https://www.linkedin.com/" target="_blank" aria-label="LinkedIn" style="margin-right:16px;">
+            <svg width="40" height="40" viewBox="0 0 32 32" fill="#1769aa" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;">
+              <rect width="32" height="32" rx="7" fill="#FFFFFF"/>
+              <path d="M9 12.5v8.5h2.7V12.5H9zm1.34-4.08a1.57 1.57 0 1 1 0 3.14 1.57 1.57 0 0 1 0-3.14zm3.47 4.08V21H17.5v-4.55c0-1.09.58-1.72 1.45-1.72.86 0 1.29.65 1.29 1.72V21H23v-5.05c0-2.57-1.37-3.77-3.19-3.77-1.49 0-2.16.82-2.54 1.4v-1.19h-2.46z" fill="#1769aa"/>
+            </svg>
+          </a>
+          <a href="https://twitter.com/" target="_blank" aria-label="Twitter">
+            <svg width="40" height="40" viewBox="0 0 32 32" fill="#1da1f2" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;">
+              <rect width="32" height="32" rx="7" fill="#FFFFFF"/>
+              <path d="M25.3 12.24a6 6 0 0 1-1.71.47 3 3 0 0 0 1.32-1.66 5.99 5.99 0 0 1-1.91.73A2.98 2.98 0 0 0 16 15a8.58 8.58 0 0 1-6.23-3.16c-.29.48-.46 1.03-.46 1.62 0 1.11.56 2.09 1.42 2.67A2.96 2.96 0 0 1 8 15.13v.04A2.99 2.99 0 0 0 10.92 18a6.04 6.04 0 0 1-1.7.23c-.41 0-.81-.04-1.2-.12a8.56 8.56 0 0 0 4.64 1.36c5.57 0 8.62-4.62 8.62-8.63 0-.13 0-.27-.01-.4A6.18 6.18 0 0 0 25.3 12.24z" fill="#1da1f2"/>
+            </svg>
+          </a>
+        </div>
+        <div class="footer-copy">
+          &copy; Space Edge 2025 All rights reserved.
+        </div>
+      </div> 
+    </footer> -->
+</body>
+</html>

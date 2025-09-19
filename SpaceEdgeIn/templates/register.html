@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Register | Space Edge</title>
+    <link rel="icon" type="image/png" href="/static/Images/logo.png">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', Arial, sans-serif;
+            background: #faf9f7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 32px 64px 24px 64px;
+            background: #ffffff00;
+            box-shadow: 0 0 0 rgba(0,0,0,0); /* Clean header no shadow */
+        }
+        .container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            width: 360px;
+            text-align: center;
+        }
+        h2 {
+            margin-bottom: 20px;
+            color: #222;
+        }
+        form.register-form {
+            max-width: 320px;
+            margin: 0 auto;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+        }
+        label {
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        input[type="email"],
+        input[type="text"],
+        input[type="password"],
+        input[type="text"] {
+            width: 100%;
+            padding: 11px 10px;
+            margin-bottom: 16px;
+            border: 1px solid #dbeafe;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: #f7fafe;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #0252cc;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+            box-sizing: border-box;
+        }
+        button:hover {
+            background: #003780;
+        }
+        p {
+            margin-top: 15px;
+            font-size: 14px;
+            text-align: center;
+        }
+        a {
+            color: #0066ff;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .btn-discord {
+            display: inline-block;
+            margin: 20px auto;
+            padding: 12px 0;
+            width: 320px;
+            background-color: #0252cc;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .btn-discord:hover {
+            background-color: #003780;
+        }
+        .flash {
+            margin-bottom: 12px;
+            font-size: 14px;
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .flash.error { color: #b33a3a; background: #ffe6e6; }
+        .flash.success { color: #2f7a2f; background: #e6ffe6; }
+        .flash.info { color: #174ea6; background: #e6f0ff; }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <a href="{{ url_for('home') }}">
+            <img src="{{ url_for('static', filename='Images/left-side-logo-right-side-text.png') }}" alt="Space Edge Logo" style="height: 100px; width: auto;">
+        </a>
+</body>
+
+
+    
+    <div class="container">
+        <h2>Register</h2>
+
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, msg in messages %}
+                    <div class="flash {{ category }}">{{ msg }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <a href="{{ url_for('discord_login') }}" class="btn-discord">Signup Or Login with Discord</a>
+
+        <!-- Step 1: Enter Email -->
+        <form method="POST" action="/register" class="register-form">
+            <label>Email:</label>
+            <input type="email" name="email" value="{{ email or '' }}" required>
+            <button type="submit" name="action" value="send_otp">Send OTP</button>
+        </form>
+
+        {% if otp_sent %}
+        <!-- Step 2: Enter OTP -->
+        <form method="POST" action="/register" class="register-form">
+            <label>Enter OTP:</label>
+            <input type="text" name="otp" required>
+            <button type="submit" name="action" value="verify_otp">Verify OTP</button>
+        </form>
+        {% endif %}
+
+        {% if otp_verified %}
+        <!-- Step 3: Set Name + Password -->
+        <form method="POST" action="/register" class="register-form">
+            <label>Name:</label>
+            <input type="text" name="name" required>
+            <label>Password:</label>
+            <input type="password" name="password" required>
+            <button type="submit" name="action" value="set_password">Set Account</button>
+        </form>
+        {% endif %}
+
+        <p>Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
+    </div>
+</body>
+</html>
