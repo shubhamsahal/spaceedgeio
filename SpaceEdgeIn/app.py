@@ -69,7 +69,7 @@ app.config['SECRET_KEY'] = '309d0aed19d3e49c754f974d8827b32bd1ab0351894fea190155
 # Discord OAuth2
 app.config["DISCORD_CLIENT_ID"] = "1410341983284760776"
 app.config["DISCORD_CLIENT_SECRET"] = "JJwIjGOJhiOcBRWxAHMR8lcl1cvEmH0W"
-app.config["DISCORD_REDIRECT_URI"] = "https://spaceedgein.onrender.com/discord/callback"
+app.config["DISCORD_REDIRECT_URI"] = "https://spaceedgeio.onrender.com/discord/callback"
 
 # Always build the URL dynamically from config
 AUTHORIZATION_BASE_URL = (
@@ -559,3 +559,4 @@ def handle_file_too_large(e):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
