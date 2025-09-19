@@ -16,16 +16,7 @@ from pymongo import MongoClient
 import mimetypes
 
 # Set the templates and static folders relative to the main app folder.
-# This assumes your directory structure is `.../SpaceEdgeIn/app.py`
-# and the templates and static folders are inside a subfolder.
-base_dir = os.path.dirname(os.path.abspath(__file__))
-project_dir = os.path.join(base_dir, 'SpaceEdgeIn')
-template_dir = os.path.join(project_dir, 'templates')
-static_dir = os.path.join(project_dir, 'static')
-
-
-# Create the Flask app, pointing to the templates and static folders
-app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
+app = Flask(__name__, template_folder='templates', static_folder='static')
 
 # Local dev only: allow OAuth2 over HTTP
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
@@ -151,7 +142,6 @@ class User(UserMixin):
         return str(self.id)
 
     def check_password(self, password):
-        # Handle cases where password_hash is None (e.g., for Discord logins)
         if self.password_hash is None or self.password_hash == "":
             return False
         return bcrypt.check_password_hash(self.password_hash, password)
@@ -165,7 +155,7 @@ def load_user_from_db(user_id):
             doc['_id'],
             doc['email'],
             doc['name'],
-            doc.get('password_hash', None),  # Use None instead of ""
+            doc.get('password_hash', None),
             doc.get('plan_type', 'free'),
             doc.get('used_storage_gb', 0.0)
         )
@@ -268,7 +258,7 @@ def discord_callback():
             id_=user_id,
             email=f"{user_id}@discord",
             name=user.name,
-            password_hash=None # Pass None for Discord logins
+            password_hash=None
         )
         add_user_to_db(user_id, new_user.email, user.name, None)
 
