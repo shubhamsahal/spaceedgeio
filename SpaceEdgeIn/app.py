@@ -68,9 +68,9 @@ except Exception as e:
 app.config['SECRET_KEY'] = '309d0aed19d3e49c754f974d8827b32bd1ab0351894fea1901557f8a47e64183'
 
 # Discord OAuth2
-app.config["DISCORD_CLIENT_ID"] = "1418673689418797207"
-app.config["DISCORD_CLIENT_SECRET"] = "BkC_CQ5810XJDpCr-b37XWQlPeJE7IzY"
-app.config["DISCORD_REDIRECT_URI"] = "http://127.0.0.1:5000/discord/callback"
+app.config["DISCORD_CLIENT_ID"] = "1410341983284760776"
+app.config["DISCORD_CLIENT_SECRET"] = "JJwIjGOJhiOcBRWxAHMR8lcl1cvEmH0W"
+app.config["DISCORD_REDIRECT_URI"] = "https://spaceedgein.onrender.com/discord/callback"
 
 # Always build the URL dynamically from config
 AUTHORIZATION_BASE_URL = (
