@@ -2,12 +2,13 @@ import os
 import json
 import io
 import stripe
+import requests
 from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file, jsonify, abort
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from flask_bcrypt import Bcrypt
 from werkzeug.exceptions import RequestEntityTooLarge
 from werkzeug.utils import secure_filename
-from flask_discord import DiscordOAuth2Session
+from flask_dance.contrib.github import make_github_blueprint, github
 from azure.storage.blob import BlobServiceClient, ContentSettings
 import random
 import smtplib
@@ -23,24 +24,21 @@ os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
 
 # Azure Blob Storage connection
-AZURE_CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=userfilesedge;AccountKey=8Hp4bJe7Ee6Sg+mT/WMh342Tobqd9GO/Np6tnk+MyMMD304A7e2mM+lLikIvvyic0IVCmRhHj1sA+ASthZC6lg==;EndpointSuffix=core.windows.net"
+AZURE_CONNECTION_STRING = os.environ.get("AZURE_CONNECTION_STRING")
 CONTAINER_NAME = "userfilesedge"
 
 blob_service_client = None
 container_client = None
 try:
     blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
-    # This will create the container if it doesn't exist, and do nothing if it does.
     container_client = blob_service_client.get_container_client(CONTAINER_NAME)
     container_client.create_container(exists_ok=True)
     print("Successfully connected to Azure Blob Storage.")
 except Exception as e:
     print(f"Error connecting to Azure Blob Storage: {e}")
-    # You might want to halt the application or use a fallback here in a real app
-
 
 # Cosmos DB Mongo connection string
-COSMOS_CONNECTION_STRING = "mongodb://spaceedgebd:bS1lHn2KVfTdDk9YCYfwUiWIYvKepsQqdY82XtL9kPWkYh2wPCblk3DxSqbhvPovyHVX1OQ5TSubACDb6zjlGg==@spaceedgebd.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@spaceedgebd@"
+COSMOS_CONNECTION_STRING = os.environ.get("COSMOS_CONNECTION_STRING")
 
 client = None
 db = None
@@ -52,30 +50,19 @@ try:
     print("Successfully connected to Cosmos DB.")
 except Exception as e:
     print(f"Error connecting to Cosmos DB: {e}")
-    # You might want to halt the application or use a fallback here in a real app
 
 
 # Flask config
-app.config['SECRET_KEY'] = '309d0aed19d3e49c754f974d8827b32bd1ab0351894fea1901557f8a47e64183'
+app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY")
 
-# Discord OAuth2
-app.config["DISCORD_CLIENT_ID"] = "1410341983284760776"
-app.config["DISCORD_CLIENT_SECRET"] = "JJwIjGOJhiOcBRWxAHMR8lcl1cvEmH0W"
-app.config["DISCORD_REDIRECT_URI"] = "https://spaceedgeio.onrender.com/discord/callback"
-
-# Always build the URL dynamically from config
-AUTHORIZATION_BASE_URL = (
-    f"https://discord.com/oauth2/authorize"
-    f"?client_id={app.config['DISCORD_CLIENT_ID']}"
-    f"&response_type=code"
-    f"&redirect_uri={app.config['DISCORD_REDIRECT_URI']}"
-    f"&scope=identify+email"
+# --- GitHub OAuth2 Config ---
+github_blueprint = make_github_blueprint(
+    client_id=os.environ.get("GITHUB_OAUTH_CLIENT_ID"),
+    client_secret=os.environ.get("GITHUB_OAUTH_CLIENT_SECRET"),
+    scope=["user:email"]
 )
-
-
-# Init session
-discord = DiscordOAuth2Session(app)
-
+app.register_blueprint(github_blueprint, url_prefix="/github_login")
+# --- End GitHub Config ---
 
 # Email OTP (Gmail SMTP)
 def send_otp_email(email):
@@ -87,8 +74,8 @@ def send_otp_email(email):
 
     server = smtplib.SMTP('smtp.gmail.com', 587)
     server.starttls()
-    server.login('noreplyverifyspaceedge@gmail.com', 'jgkz knoi wqay ymqr')
-    server.sendmail('noreplyverifyspaceedge@gmail.com', [email], msg.as_string())
+    server.login(os.environ.get("EMAIL_USER"), os.environ.get("EMAIL_PASS"))
+    server.sendmail(os.environ.get("EMAIL_USER"), [email], msg.as_string())
     server.quit()
 
     return otp
@@ -228,43 +215,32 @@ def azure_delete(user_email: str, filename: str) -> None:
 # Routes
 @app.route("/")
 def home():
-    # If the user is logged in, redirect to dashboard
     if current_user.is_authenticated:
         return redirect(url_for("dashboard"))
-    # Otherwise, show a real homepage with login & signup links
     return render_template("home.html")
 
-
-@app.route("/discord/login")
-def discord_login():
-    redirect_uri = url_for("discord_callback", _external=True)
-    return discord.create_session(scope=["identify", "email"], redirect_uri=redirect_uri)
-
-@app.route("/discord/callback")
-def discord_callback():
-    try:
-        discord.callback()
-    except Exception as e:
-        print(f"Error in discord.callback(): {e}")
-        flash("OAuth callback error. See server log.", "error")
-        return redirect(url_for("login"))
+# GitHub OAuth2 Routes
+@app.route("/github")
+def github_login():
+    if not github.authorized:
+        return redirect(url_for("github.login"))
     
-    user = discord.fetch_user()
-    user_id = str(user.id)
+    # Get user info from GitHub
+    resp = github.get("/user")
+    user_info = resp.json()
+    
+    user_id = str(user_info["id"])
+    email_resp = github.get("/user/emails")
+    email = email_resp.json()[0]["email"]
 
-    # Check if user exists in Cosmos DB
-    if not load_user_from_db(user_id):
-        new_user = User(
-            id_=user_id,
-            email=f"{user_id}@discord",
-            name=user.name,
-            password_hash=None
-        )
-        add_user_to_db(user_id, new_user.email, user.name, None)
-
-    login_user(load_user_from_db(user_id))
-    session["discord_username"] = user.name
-    flash(f"Logged in as Discord user: {user.name}", "success")
+    # Check if user exists, and create if not
+    user = load_user_from_db(user_id)
+    if not user:
+        add_user_to_db(user_id, email, user_info["login"], None)
+        user = load_user_from_db(user_id)
+        
+    login_user(user)
+    flash(f"Logged in as GitHub user: {user_info['login']}", "success")
     return redirect(url_for("dashboard"))
 
 @app.route("/register", methods=["GET", "POST"])
@@ -339,9 +315,6 @@ def login():
             return redirect(url_for("dashboard"))
         else:
             flash("Invalid email or password", "error")
-
-    if 'discord_username' in session and not current_user.is_authenticated:
-        flash(f"Logged in as Discord user: {session.get('discord_username')}", "info")
 
     return render_template("login.html")
 
@@ -451,7 +424,6 @@ def public_file_download(user_email, filename):
 
 @app.route("/files/<user_email>/<filename>/thumb")
 def file_thumbnail(user_email, filename):
-    # For images only, serve a thumbnail (or full image if thumbnailing not yet implemented)
     data = azure_download(user_email, filename)
     mime_type = mimetypes.guess_type(filename)[0] or 'image/png'
     return send_file(
@@ -523,14 +495,11 @@ def create_checkout_session():
 @app.route("/success")
 @login_required
 def success():
-    # User will be redirected here after a successful Stripe payment.
-    # The actual subscription update will happen via webhook.
     return "<h1>Payment successful! We'll update your account shortly.</h1>"
     
 @app.route("/cancel")
 @login_required
 def cancel():
-    # User will be redirected here if they cancel Stripe Checkout.
     flash("Payment cancelled. You can try again at any time.", "info")
     return redirect(url_for("pricing"))
 
